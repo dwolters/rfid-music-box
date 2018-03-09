@@ -18,7 +18,7 @@ components and how they are connected.
 #define RST_PIN 9 // Needed for RST of RC522
 #define SS_PIN 10 // Needed for SDA(SS) of RC522
 
-#define CARD_ID_LENGTH 4
+#define CARD_ID_LENGTH 4 // Number of bytes per card id
 
 // IDs of RFID
 const byte CARDS[][CARD_ID_LENGTH] = {
@@ -29,17 +29,17 @@ const int CARD_COUNT = sizeof(CARDS) / sizeof(CARDS[0]);
 
 byte currentCard[] = {0, 0, 0, 0};
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
+MFRC522 rfidReader(SS_PIN, RST_PIN);
 
-SoftwareSerial mySoftwareSerial(SOFT_RX, SOFT_TX); // RX, TX
-DFRobotDFPlayerMini myDFPlayer;
+SoftwareSerial softwareSerial(SOFT_RX, SOFT_TX); // RX, TX
+DFRobotDFPlayerMini player;
 
 void setup()
 {
-    mySoftwareSerial.begin(9600);
+    softwareSerial.begin(9600);
     Serial.begin(9600);
 
-    while (!myDFPlayer.begin(mySoftwareSerial))
+    while (!player.begin(softwareSerial))
     {
         Serial.println("Unable to begin:");
         Serial.println("Recheck TX/RX");
@@ -50,28 +50,28 @@ void setup()
 
     Serial.println("DFPlayer Mini online.");
 
-    myDFPlayer.volume(30); //Set volume value. From 0 to 30
+    player.volume(30); // Seting volume to maximum
 
-    SPI.begin();        // Init SPI bus
-    mfrc522.PCD_Init(); // Init MFRC522
+    SPI.begin();
+    rfidReader.PCD_Init();
 }
 
 void loop()
 {
-    if (myDFPlayer.available())
+    if (player.available())
     {
-        printDetail(myDFPlayer.readType(), myDFPlayer.read()); //Print the detail message from DFPlayer to handle different errors and states.
+        handlePlayerState(player.readType(), player.read()); //Print the detail message from DFPlayer to handle different errors and states.
     }
 
-    if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial() && isNewCard(mfrc522.uid.uidByte))
+    if (rfidReader.PICC_IsNewCardPresent() && rfidReader.PICC_ReadCardSerial() && isNewCard(rfidReader.uid.uidByte))
     {
         Serial.println("New card found: ");
         printCardId(currentCard);
         Serial.println();
 
         int fileNumber = getCardIndex() + 1;
-        myDFPlayer.stop();
-        myDFPlayer.play(fileNumber);
+        player.stop();
+        player.play(fileNumber);
     }
 
     delay(50);
@@ -120,9 +120,9 @@ void printCardId(byte *card)
     }
 }
 
-void printDetail(uint8_t type, int value)
+void handlePlayerState(uint8_t state, int value)
 {
-    switch (type)
+    switch (state)
     {
     case TimeOut:
         Serial.println("Time Out!");
