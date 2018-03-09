@@ -15,6 +15,51 @@
 
 In total these components should be less than $10. In bulk they might even be cheaper. On top comes the cost of the case.
 
+## Wiring
+
+The following explains how the different components are connected. Different microcontrollers can be used as an replacement for the Arduino Nano, e.g., NodeMCU. However, the Arduino Nano is cheap and provides both 5V and 3.3V, which is ideal for these components.
+
+### RC522 to Arduino Nano
+```
+RST     = D9 (can be configured in the sketch)
+SDA(SS) = D10 (can be configured in the sketch)
+MOSI    = D12
+MISO    = D11
+SCK     = D13
+GND     = GND
+3.3V    = 3.3V
+```
+
+### RC522 to NodeMCU (alternative to Arduino Nano)
+```
+RST     = D3 (can be configured in the sketch)
+SDA(SS) = D5 (can be configured in the sketch)
+MOSI    = D7 
+MISO    = D6
+SCK     = D5
+GND     = GND
+3.3V    = NodeMCU does not provide 3.3V - use other power supply
+```
+
+### DF Player Mini to Arduino Nano
+```
+5V      = 5V
+GND     = GND
+TX      = D8 (or whatever is defined as SOFT_RX in the sketch)
+RX      = D7 (or whatever is defined as SOFT_TX in the sketch)
+```
+
+*Note:* TX must be connected to RX and vice versa.
+
+### PAM8403 to DF Player Mini
+```
+R       = DAC_R
+L       = DAC_L
+GND     = GND
+5V      = Some 5V power supply
+``` 
+
+
 ## Commercial Off-the-Shelf Solutions
 
 There are some commercial off-the-shelf solutions doing the same thing. However, those are far more expensive and do not always allow to play arbitrary MP3 files.
